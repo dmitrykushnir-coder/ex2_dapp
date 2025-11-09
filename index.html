@@ -1,9 +1,54 @@
-<!doctype html>
-    <html>
-        <head>
-            <!-- Заголовок документа -->
-        </head>
-        <body>
-            <H1>test</H1>
-        </body>
-    </html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ether.js Пример</title>
+    <!-- Подключение библиотеки ethers.js через CDN -->
+    <script src="ethers.umd.min.js"
+            type="application/javascript"></script>
+</head>
+<body>
+
+    <h1>Пример с Ether.js</h1>
+    <p>Состояние подключения: <span id="connection-status">Не подключено</span></p>
+    <p>Адрес аккаунта: <span id="account-address"></span></p>
+    <button id="connect-button">Подключиться к MetaMask</button>
+
+    <script>
+        // Получаем элементы страницы
+        const connectionStatusElement = document.getElementById('connection-status');
+        const accountAddressElement = document.getElementById('account-address');
+        const connectButton = document.getElementById('connect-button');
+
+        // Проверяем, есть ли у пользователя MetaMask
+        if (typeof window.ethereum !== 'undefined') {
+            console.log('MetaMask установлен!');
+            connectionStatusElement.textContent = 'MetaMask установлен, готов к подключению.';
+        } else {
+            console.log('MetaMask не установлен!');
+            connectionStatusElement.textContent = 'MetaMask не найден. Установите расширение.';
+            connectButton.style.display = 'none'; // Скрываем кнопку, если MetaMask не установлен
+        }
+
+        // Обработчик нажатия на кнопку
+        connectButton.addEventListener('click', async () => {
+            try {
+                // Запрашиваем доступ к аккаунтам
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+
+                // Обновляем интерфейс
+                connectionStatusElement.textContent = 'Подключено';
+                accountAddressElement.textContent = address;
+                connectButton.style.display = 'none'; // Скрываем кнопку после подключения
+
+            } catch (error) {
+                console.error("Ошибка подключения:", error);
+                connectionStatusElement.textContent = 'Ошибка подключения';
+            }
+        });
+    </script>
+
+</body>
+</html>
